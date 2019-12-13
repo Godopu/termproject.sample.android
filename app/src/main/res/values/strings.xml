@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">termproject</string>
+    <string name="ip_adr">192.168.12.216</string>
+    <string name="port">5000</string>
+    <string name="logo">Logo</string>
+</resources>
