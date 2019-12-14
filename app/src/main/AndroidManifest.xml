@@ -14,7 +14,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning"
         >
-        <activity android:name=".controller.MainActivity">
+        <activity android:name=".controller.DisplayActivity">
         </activity>
         <activity android:name=".controller.LoadingActivity">
 
@@ -26,6 +26,8 @@
         <activity android:name=".controller.DoorActivity">
         </activity>
         <activity android:name=".controller.LedActivity">
+        </activity>
+        <activity android:name=".controller.TempActivity">
         </activity>
 
         <activity android:name=".controller.ServiceListActivity">

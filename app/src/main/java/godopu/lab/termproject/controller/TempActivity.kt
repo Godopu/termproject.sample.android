@@ -12,16 +12,16 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import godopu.lab.termproject.R
-import godopu.lab.termproject.databinding.ActivityDoorBinding
+import godopu.lab.termproject.databinding.ActivityTempBinding
 import godopu.lab.termproject.model.HttpService
 import godopu.lab.termproject.model.ObserverWithHttp
 import org.json.JSONObject
 
-class DoorActivity : AppCompatActivity() {
+class TempActivity : AppCompatActivity() {
 
-    private var observer : ObserverWithHttp ?= null
+    private var observer : ObserverWithHttp?= null
     private var service: HttpService? = null
-    private var binding : ActivityDoorBinding? = null
+    private var binding : ActivityTempBinding? = null
     private val connection = object : ServiceConnection {
         override fun onServiceDisconnected(name: ComponentName?) {
             Log.i("pudroid", "Service Disconnected!!")
@@ -32,7 +32,7 @@ class DoorActivity : AppCompatActivity() {
             Log.i("pudroid", "Service Connected!!")
             service = (iBinder as HttpService.LocalBinder).getService()
             if(service != null)
-                registerObserver(this@DoorActivity, service as HttpService, this@DoorActivity.mHandler, "door-latest")
+                registerObserver(this@TempActivity, service as HttpService, this@TempActivity.mHandler, "temp-latest")
         }
     }
 
@@ -45,22 +45,22 @@ class DoorActivity : AppCompatActivity() {
         if(observer != null) observer!!.destroy()
     }
 
-    class PuObserverHandler(_activity : DoorActivity) : Handler(){
-        private val activity : DoorActivity = _activity
+    class PuObserverHandler(_activity : TempActivity) : Handler(){
+        private val activity : TempActivity = _activity
         override fun handleMessage(msg: Message) {
             super.handleMessage(msg)
-            val value = (msg.obj as JSONObject)["state"] as String
+            val obj = msg.obj as JSONObject
+            val temp = obj["temp"]
+            val humi = obj["humi"]
 
             when(msg.what){
                 ObserverWithHttp.INIT->{
-                    Log.i("pudroid", "INIT $value")
-                    if(activity.binding!!.status != value)
-                        activity.binding!!.status = value
+                    activity.binding!!.temp = "Temp - $temp"
+                    activity.binding!!.humi = "Humi - $humi"
                 }
                 ObserverWithHttp.CHANGED->{
-                    Log.i("pudroid", "CHANGED $value")
-                    if(activity.binding!!.status != value)
-                        activity.binding!!.status = value
+                    activity.binding!!.temp = "Temp - $temp"
+                    activity.binding!!.humi = "Humi - $humi"
                 }
             }
         }
@@ -71,8 +71,9 @@ class DoorActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_door)
-        binding!!.status = "loading..."
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_temp)
+        binding!!.temp = "loading..."
+        binding!!.humi = "loading..."
         if (service == null) {
             val serviceIntent = Intent(this, HttpService::class.java)
             bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE)

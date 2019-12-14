@@ -4,7 +4,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Binder
-import android.os.Handler
 import android.os.IBinder
 import android.util.Log
 import godopu.lab.termproject.controller.components.HttpResponseEventRouter
@@ -14,15 +13,15 @@ import java.io.PrintStream
 import java.net.HttpURLConnection
 import java.net.URL
 
-class HttpService : Service() {
+class TempService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.i("pudroid", "Service start!!")
         return super.onStartCommand(intent, flags, startId)
     }
 
     inner class LocalBinder : Binder(){
-        fun getService(): HttpService {
-            return this@HttpService
+        fun getService(): TempService {
+            return this@TempService
         }
     }
     private val binder = LocalBinder()
@@ -35,10 +34,6 @@ class HttpService : Service() {
         Log.i("pudroid", "Service destroy")
         super.onDestroy()
     }
-
-
-
-
 
     fun httpRequestWithHandler(
         context: Context,

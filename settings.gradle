@@ -1,2 +1,2 @@
-include ':app'
-rootProject.name='swfestival'
+include ':app', ':sweetalert'
+rootProject.name='termproject'

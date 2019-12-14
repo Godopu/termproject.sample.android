@@ -22,6 +22,8 @@ class LedActivity : AppCompatActivity() {
 
     private var service: HttpService? = null
     private var binding : ActivityLedBinding? = null
+    private var observer : ObserverWithHttp ?= null
+
     private val connection = object : ServiceConnection {
         override fun onServiceDisconnected(name: ComponentName?) {
             Log.i("pudroid", "Service Disconnected!!")
@@ -31,16 +33,27 @@ class LedActivity : AppCompatActivity() {
         override fun onServiceConnected(componentName: ComponentName, iBinder: IBinder) {
             Log.i("pudroid", "Service Connected!!")
             service = (iBinder as HttpService.LocalBinder).getService()
-            service!!.registerObserver(this@LedActivity, this@LedActivity.mHandler, "led-latest")
+            if(service != null)
+                registerObserver(this@LedActivity, service as HttpService, this@LedActivity.mHandler, "led-latest")
             initComponent()
         }
+    }
+
+    fun registerObserver(_context : Context, _service : HttpService, _mHandler : Handler, _resName : String){
+        if(observer != null) observer!!.destroy()
+        observer = ObserverWithHttp(_context, _service, _mHandler, _resName)
+    }
+
+    fun deregisterObserver(){
+        if(observer != null) observer!!.destroy()
     }
 
     class PuObserverHandler(_activity : LedActivity) : Handler(){
         private val activity : LedActivity = _activity
         override fun handleMessage(msg: Message) {
             super.handleMessage(msg)
-            val value = msg.obj as String
+            val value = (msg.obj as JSONObject)["state"] as String
+
             when(msg.what){
                 ObserverWithHttp.INIT->{
                     Log.i("pudroid", "INIT $value")
@@ -70,7 +83,7 @@ class LedActivity : AppCompatActivity() {
     }
 
     fun initComponent(){
-        this.binding!!.toggleBtn!!.setOnClickListener {
+        this.binding!!.toggleBtn.setOnClickListener {
             if(binding!!.toggleBtn.text == "on"){
                 binding!!.toggleBtn.text = "off"
                 val obj = JSONObject()
@@ -123,7 +136,7 @@ class LedActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         if (service != null) {
-            this.service!!.deregisterObserver()
+            deregisterObserver()
             val serviceIntent = Intent(this, HttpService::class.java)
             stopService(serviceIntent)
 

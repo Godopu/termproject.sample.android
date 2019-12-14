@@ -87,7 +87,7 @@ class LoadingActivity : AppCompatActivity() {
                                 val intent =
                                     Intent(
                                         this@LoadingActivity,
-                                        MainActivity::class.java
+                                        DisplayActivity::class.java
                                     )
                                 startActivity(intent)
                                 overridePendingTransition(

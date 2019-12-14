@@ -24,11 +24,11 @@ class ObserverWithHttp(_context: Context, _service: HttpService, _mHandler: Hand
                 200 -> {
                     val obj = JSONObject(arg)
 
-                    if(obj["state"] != latest)
+                    if(obj["timestamp"] != latest)
                     {
-                        if(latest == "") mHandler.sendMessage(mHandler.obtainMessage(INIT, obj["state"]))
-                        else mHandler.sendMessage(mHandler.obtainMessage(CHANGED, obj["state"]))
-                        latest = obj["state"] as String
+                        if(latest == "") mHandler.sendMessage(mHandler.obtainMessage(INIT, obj))
+                        else mHandler.sendMessage(mHandler.obtainMessage(CHANGED, obj))
+                        latest = obj["timestamp"] as String
                     }
                 }
             }

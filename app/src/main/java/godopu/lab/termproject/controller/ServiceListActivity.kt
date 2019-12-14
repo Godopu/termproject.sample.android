@@ -1,14 +1,7 @@
 package godopu.lab.termproject.controller
 
-import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.Handler
-import android.os.IBinder
-import android.os.Message
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,14 +14,13 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import cn.pedant.SweetAlert.SweetAlertDialog
+import cn.pedant.sweetalert.SweetAlertDialog
 import godopu.lab.termproject.R
-import godopu.lab.termproject.databinding.ActivityDoorBinding
 import godopu.lab.termproject.databinding.ActivityServicelistBinding
 import godopu.lab.termproject.model.Device
 import godopu.lab.termproject.model.HttpService
-import godopu.lab.termproject.model.ObserverWithHttp
-import org.json.JSONObject
+import java.util.*
+import kotlin.collections.ArrayList
 
 class ServiceListActivity : AppCompatActivity() {
 
@@ -42,12 +34,121 @@ class ServiceListActivity : AppCompatActivity() {
 
     private fun selectItemEventListener(item: Device) {
         when (item.Name) {
-            "Car-seat" -> {
-                dialog = SweetAlertDialog(this@ServiceListActivity, SweetAlertDialog.NORMAL_TYPE)
+            "LED" -> {
+                dialog = SweetAlertDialog(this@ServiceListActivity, SweetAlertDialog.FINGER_TYPE)
                 dialog.titleText = "Car-seat Occupation Request"
                 dialog.contentText = "Please wait for occupation of car-seat"
                 dialog.show()
-                dialog!!.dismiss()
+                Timer().schedule(object : TimerTask(){
+                    override fun run() {
+                        this@ServiceListActivity.runOnUiThread{
+                            dialog.changeAlertType(SweetAlertDialog.SUCCESS_TYPE)
+                        }
+                    }
+                }, 1000)
+                Timer().schedule(object : TimerTask(){
+                    override fun run() {
+                        this@ServiceListActivity.runOnUiThread{
+                            dialog.dismiss()
+                        }
+                    }
+                }, 1700)
+                Timer().schedule(object : TimerTask(){
+                    override fun run() {
+                        this@ServiceListActivity.runOnUiThread{
+                            val intent = Intent(this@ServiceListActivity, LedActivity::class.java)
+                            startActivity(intent)
+                            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                        }
+                    }
+                }, 2100)
+            }
+            "Display" -> {
+                dialog = SweetAlertDialog(this@ServiceListActivity, SweetAlertDialog.FINGER_TYPE)
+                dialog.titleText = "Car-seat Occupation Request"
+                dialog.contentText = "Please wait for occupation of car-seat"
+                dialog.show()
+                Timer().schedule(object : TimerTask(){
+                    override fun run() {
+                        this@ServiceListActivity.runOnUiThread{
+                            dialog.changeAlertType(SweetAlertDialog.SUCCESS_TYPE)
+                        }
+                    }
+                }, 1000)
+                Timer().schedule(object : TimerTask(){
+                    override fun run() {
+                        this@ServiceListActivity.runOnUiThread{
+                            dialog.dismiss()
+                        }
+                    }
+                }, 1700)
+                Timer().schedule(object : TimerTask(){
+                    override fun run() {
+                        this@ServiceListActivity.runOnUiThread{
+                            val intent = Intent(this@ServiceListActivity, DisplayActivity::class.java)
+                            startActivity(intent)
+                            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                        }
+                    }
+                }, 2100)
+            }
+            "Door" -> {
+                dialog = SweetAlertDialog(this@ServiceListActivity, SweetAlertDialog.FINGER_TYPE)
+                dialog.titleText = "Car-seat Occupation Request"
+                dialog.contentText = "Please wait for occupation of car-seat"
+                dialog.show()
+                Timer().schedule(object : TimerTask(){
+                    override fun run() {
+                        this@ServiceListActivity.runOnUiThread{
+                            dialog.changeAlertType(SweetAlertDialog.SUCCESS_TYPE)
+                        }
+                    }
+                }, 1000)
+                Timer().schedule(object : TimerTask(){
+                    override fun run() {
+                        this@ServiceListActivity.runOnUiThread{
+                            dialog.dismiss()
+                        }
+                    }
+                }, 1700)
+                Timer().schedule(object : TimerTask(){
+                    override fun run() {
+                        this@ServiceListActivity.runOnUiThread{
+                            val intent = Intent(this@ServiceListActivity, DoorActivity::class.java)
+                            startActivity(intent)
+                            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                        }
+                    }
+                }, 2100)
+            }
+            "Temp" -> {
+                dialog = SweetAlertDialog(this@ServiceListActivity, SweetAlertDialog.FINGER_TYPE)
+                dialog.titleText = "Car-seat Occupation Request"
+                dialog.contentText = "Please wait for occupation of car-seat"
+                dialog.show()
+                Timer().schedule(object : TimerTask(){
+                    override fun run() {
+                        this@ServiceListActivity.runOnUiThread{
+                            dialog.changeAlertType(SweetAlertDialog.SUCCESS_TYPE)
+                        }
+                    }
+                }, 1000)
+                Timer().schedule(object : TimerTask(){
+                    override fun run() {
+                        this@ServiceListActivity.runOnUiThread{
+                            dialog.dismiss()
+                        }
+                    }
+                }, 1700)
+                Timer().schedule(object : TimerTask(){
+                    override fun run() {
+                        this@ServiceListActivity.runOnUiThread{
+                            val intent = Intent(this@ServiceListActivity, TempActivity::class.java)
+                            startActivity(intent)
+                            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                        }
+                    }
+                }, 2100)
             }
         }
     }
@@ -63,11 +164,10 @@ class ServiceListActivity : AppCompatActivity() {
         this.recyclerView.adapter = this.adapter
         this.recyclerView.layoutManager = this.layoutManager
 
-        this.adapter.addItem(Device("User", "User"))
+        this.adapter.addItem(Device("LED", "LED"))
         this.adapter.addItem(Device("Display", "Display"))
-        this.adapter.addItem(Device("Car-seat", "Car-seat"))
-        this.adapter.addItem(Device("Sensor", "Sensor"))
-        this.adapter.addItem(Device("Heated-Seat", "Heated-Seat"))
+        this.adapter.addItem(Device("Door", "Display"))
+        this.adapter.addItem(Device("Temp", "Display"))
 
         this.adapter.notifyDataSetChanged()
     }
@@ -75,10 +175,8 @@ class ServiceListActivity : AppCompatActivity() {
 
     override fun onPause() {
         if (service != null) {
-            this.service!!.deregisterObserver()
             val serviceIntent = Intent(this, HttpService::class.java)
             stopService(serviceIntent)
-
         }
 
         super.onPause()
@@ -108,7 +206,7 @@ class ServiceListActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
             holder.imageView.setImageResource(mItems[position].Image)
-            holder.textView.text = mItems[position].Category
+            holder.textView.text = mItems[position].Name
             holder.constraint.setOnClickListener {
                 this.context.selectItemEventListener(mItems[position])
             }
@@ -130,10 +228,6 @@ class ServiceListActivity : AppCompatActivity() {
 
         fun addItem(category: Device) {
             mItems.add(category)
-        }
-
-        fun addItem(category: Device, idx : Int) {
-            mItems.add(idx, category)
         }
 
         private class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

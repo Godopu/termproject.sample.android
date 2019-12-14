@@ -17,6 +17,7 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -26,18 +27,18 @@ import androidx.recyclerview.widget.RecyclerView
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import godopu.lab.termproject.R
 import godopu.lab.termproject.controller.components.HttpResponseEventRouter
-import godopu.lab.termproject.databinding.ActivityMainBinding
+import godopu.lab.termproject.databinding.ActivityDisplayBinding
 import godopu.lab.termproject.model.Content
 import godopu.lab.termproject.model.HttpService
 import org.json.JSONObject
 import java.util.*
 import kotlin.collections.ArrayList
 
-class MainActivity : AppCompatActivity() {
+class DisplayActivity : AppCompatActivity() {
     private lateinit var slidingUpPanel: SlidingUpPanelLayout
     private lateinit var collapsedBody: LinearLayoutCompat
     private lateinit var dragIcon: ImageView
-    private var binding: ActivityMainBinding? = null
+    private var binding: ActivityDisplayBinding? = null
 
     private var vWidth = 0
     private var vHeight = 0
@@ -51,11 +52,10 @@ class MainActivity : AppCompatActivity() {
     private var timer: Timer? = null
 
     private var service : HttpService? = null
-    private var checker: Timer? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_display)
         binding!!.title = "Video Content Delivery"
         binding!!.strPlayTitle = "Temp"
         binding!!.mEndTime = "0:00"
@@ -81,34 +81,6 @@ class MainActivity : AppCompatActivity() {
         override fun onServiceConnected(componentName: ComponentName, iBinder: IBinder) {
             Log.i("pudroid", "Service Connected!!")
             service = (iBinder as HttpService.LocalBinder).getService()
-            checker = Timer()
-            checker!!.scheduleAtFixedRate(object : TimerTask() {
-                override fun run() {
-                    service!!.httpRequestWithHandler(this@MainActivity,
-                        "GET",
-                        "http://192.168.12.216:5000/update",
-                        object : HttpResponseEventRouter {
-                            override fun route(context: Context, code: Int, arg: String) {
-                                val obj = JSONObject(arg)
-                                if(obj["state"] == "/loading")
-                                {
-                                    val intent =
-                                        Intent(
-                                            this@MainActivity,
-                                            LoadingActivity::class.java
-                                        )
-                                    startActivity(intent)
-                                    overridePendingTransition(
-                                        android.R.anim.slide_in_left,
-                                        android.R.anim.slide_out_right
-                                    )
-                                    checker!!.cancel()
-                                    finish()
-                                }
-                            }
-                        })
-                }
-            }, 2000, 2000)
         }
     }
 
@@ -120,12 +92,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun cancelClick(v: View) {
-        this.stop()
+//        this.stop()
+        Toast.makeText(this, "Cancel", Toast.LENGTH_SHORT).show()
+
         service!!.httpRequestWithHandler(
-            this@MainActivity,
+            this,
             "PUT",
-            "http://192.168.12.216/cancel",
-            null
+            "http://${this.getString(R.string.display_ip_adr)}:5000/cancel",
+            object : HttpResponseEventRouter {
+                override fun route(context: Context, code: Int, arg: String) {
+                    if (this@DisplayActivity.timer != null) {
+                        this@DisplayActivity.timer!!.cancel()
+                        this@DisplayActivity.timer = null
+                    }
+                }
+            }
         )
 
         this.slidingUpPanel.panelHeight = 0
@@ -195,9 +176,9 @@ class MainActivity : AppCompatActivity() {
                         dragIcon.layoutParams.width = pWidth
                         dragIcon.layoutParams.height = pHeight
                         collapsedBody.visibility = View.GONE
-                        if (this@MainActivity.slidingUpPanel.panelHeight != this@MainActivity.vHeight)
-                            this@MainActivity.slidingUpPanel.panelHeight =
-                                this@MainActivity.vHeight
+                        if (this@DisplayActivity.slidingUpPanel.panelHeight != this@DisplayActivity.vHeight)
+                            this@DisplayActivity.slidingUpPanel.panelHeight =
+                                this@DisplayActivity.vHeight
                     }
                 }
                 dragIcon.requestLayout()
@@ -206,19 +187,19 @@ class MainActivity : AppCompatActivity() {
 
         binding!!.seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onStopTrackingTouch(p0: SeekBar?) {
-                if (this@MainActivity.seekbar!!.progress % 60 < 10)
+                if (this@DisplayActivity.seekbar!!.progress % 60 < 10)
                     binding!!.mStartTime =
-                        "${this@MainActivity.seekbar!!.progress / 60}:0${this@MainActivity.seekbar!!.progress % 60}"
+                        "${this@DisplayActivity.seekbar!!.progress / 60}:0${this@DisplayActivity.seekbar!!.progress % 60}"
                 else
                     binding!!.mStartTime =
-                        "${this@MainActivity.seekbar!!.progress / 60}:${this@MainActivity.seekbar!!.progress % 60}"
+                        "${this@DisplayActivity.seekbar!!.progress / 60}:${this@DisplayActivity.seekbar!!.progress % 60}"
                 val obj = JSONObject().apply {
                     put("seek", p0!!.progress)
                 }
                 service!!.httpRequestWithHandler(
-                    this@MainActivity,
+                    this@DisplayActivity,
                     "PUT",
-                    "http://192.168.12.216:5000/seek",
+                    "http://${this@DisplayActivity.getString(R.string.display_ip_adr)}:5000/seek",
                     obj.toString(),
                     null
                 )
@@ -234,14 +215,14 @@ class MainActivity : AppCompatActivity() {
         service!!.httpRequestWithHandler(
             this,
             "PUT",
-            "http://192.168.12.216:5000/pause",
+            "http://${this.getString(R.string.display_ip_adr)}:5000/pause",
             object : HttpResponseEventRouter {
                 override fun route(context: Context, code: Int, arg: String) {
-                    this@MainActivity.binding!!.playBtn1.setImageResource(R.mipmap.button_play)
-                    this@MainActivity.binding!!.playBtn2.setImageResource(R.mipmap.button_play)
-                    if (this@MainActivity.timer != null) {
-                        this@MainActivity.timer!!.cancel()
-                        this@MainActivity.timer = null
+                    this@DisplayActivity.binding!!.playBtn1.setImageResource(R.mipmap.button_play)
+                    this@DisplayActivity.binding!!.playBtn2.setImageResource(R.mipmap.button_play)
+                    if (this@DisplayActivity.timer != null) {
+                        this@DisplayActivity.timer!!.cancel()
+                        this@DisplayActivity.timer = null
                     }
                 }
             }
@@ -252,25 +233,25 @@ class MainActivity : AppCompatActivity() {
         service!!.httpRequestWithHandler(
             this,
             "PUT",
-            "http://192.168.12.216:5000/play",
+            "http://${this.getString(R.string.display_ip_adr)}:5000/play",
             object : HttpResponseEventRouter {
                 override fun route(context: Context, code: Int, arg: String) {
                     mHandler.post {
-                        this@MainActivity
+                        this@DisplayActivity
                             .binding!!.playBtn1.setImageResource(R.mipmap.button_pause)
-                        this@MainActivity
+                        this@DisplayActivity
                             .binding!!.playBtn2.setImageResource(R.mipmap.button_pause)
-                        this@MainActivity.timer = Timer()
-                        this@MainActivity.timer!!.scheduleAtFixedRate(object : TimerTask() {
+                        this@DisplayActivity.timer = Timer()
+                        this@DisplayActivity.timer!!.scheduleAtFixedRate(object : TimerTask() {
                             override fun run() {
-                                this@MainActivity.mHandler.post {
-                                    if (this@MainActivity.seekbar!!.progress % 60 < 10)
+                                this@DisplayActivity.mHandler.post {
+                                    if (this@DisplayActivity.seekbar!!.progress % 60 < 10)
                                         binding!!.mStartTime =
-                                            "${this@MainActivity.seekbar!!.progress / 60}:0${this@MainActivity.seekbar!!.progress % 60}"
+                                            "${this@DisplayActivity.seekbar!!.progress / 60}:0${this@DisplayActivity.seekbar!!.progress % 60}"
                                     else
                                         binding!!.mStartTime =
-                                            "${this@MainActivity.seekbar!!.progress / 60}:${this@MainActivity.seekbar!!.progress % 60}"
-                                    this@MainActivity.seekbar!!.progress += 1
+                                            "${this@DisplayActivity.seekbar!!.progress / 60}:${this@DisplayActivity.seekbar!!.progress % 60}"
+                                    this@DisplayActivity.seekbar!!.progress += 1
                                 }
                             }
                         }, 0, 1000)
@@ -287,7 +268,7 @@ class MainActivity : AppCompatActivity() {
         service!!.httpRequestWithHandler(
             this,
             "PUT",
-            "http://192.168.12.216:5000/video",
+            "http://${this.getString(R.string.display_ip_adr)}:5000/video",
             obj.toString(),
             null
         )
@@ -309,11 +290,6 @@ class MainActivity : AppCompatActivity() {
         Log.i("pudroid", "onResume - ${dragIcon.layoutParams.width}")
     }
 
-    override fun onPause() {
-
-        super.onPause()
-    }
-
     override fun onPostResume() {
         super.onPostResume()
         Log.i("pudroid", "onPostResume - ${dragIcon.layoutParams.width}")
@@ -325,17 +301,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private class ContentListAdapter : RecyclerView.Adapter<ContentListAdapter.ViewHolder> {
-        private var context: MainActivity
+        private var context: DisplayActivity
         private var mItems: ArrayList<Content>
         private var lastPosition: Int = -1
         private var prePlayingItem: ImageView? = null
 
-        constructor(context: MainActivity, mItems: ArrayList<Content>) {
+        constructor(context: DisplayActivity, mItems: ArrayList<Content>) {
             this.context = context
             this.mItems = mItems
         }
 
-        constructor(context: MainActivity) {
+        constructor(context: DisplayActivity) {
             this.context = context
             this.mItems = ArrayList()
         }
