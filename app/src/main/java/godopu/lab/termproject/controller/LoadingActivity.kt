@@ -1,6 +1,7 @@
 package godopu.lab.termproject.controller
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
@@ -29,6 +30,10 @@ class LoadingActivity : AppCompatActivity() {
 
         if (permission != PackageManager.PERMISSION_GRANTED) {
             makeRequest()
+        }else{
+            val intent = Intent(this@LoadingActivity, ServiceListActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
     }
 
