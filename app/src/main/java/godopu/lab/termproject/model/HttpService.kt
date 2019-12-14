@@ -39,9 +39,9 @@ class HttpService : Service() {
 
     private var observer : ObserverWithHttp ?= null
 
-    fun registerObserver(_context : Context, _mHandler : Handler){
+    fun registerObserver(_context : Context, _mHandler : Handler, _resName : String){
         if(observer != null) observer!!.destroy()
-        observer = ObserverWithHttp(_context, this, _mHandler)
+        observer = ObserverWithHttp(_context, this, _mHandler, _resName)
     }
     fun deregisterObserver(){
         if(observer != null) observer!!.destroy()

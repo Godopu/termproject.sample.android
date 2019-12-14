@@ -23,12 +23,18 @@
         <activity android:name=".controller.VideoActivity">
 
         </activity>
-        <activity android:name=".controller.TestActivity">
+        <activity android:name=".controller.DoorActivity">
+        </activity>
+        <activity android:name=".controller.LedActivity">
+        </activity>
+
+        <activity android:name=".controller.ServiceListActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <service android:name=".model.HttpService"/>
         <service android:name=".controller.components.VideoService"/>
 

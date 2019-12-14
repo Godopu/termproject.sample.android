@@ -12,14 +12,14 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import godopu.lab.termproject.R
-import godopu.lab.termproject.databinding.ActivityTestBinding
+import godopu.lab.termproject.databinding.ActivityDoorBinding
 import godopu.lab.termproject.model.HttpService
 import godopu.lab.termproject.model.ObserverWithHttp
 
-class TestActivity : AppCompatActivity() {
+class DoorActivity : AppCompatActivity() {
 
     private var service: HttpService? = null
-    private var binding : ActivityTestBinding? = null
+    private var binding : ActivityDoorBinding? = null
     private val connection = object : ServiceConnection {
         override fun onServiceDisconnected(name: ComponentName?) {
             Log.i("pudroid", "Service Disconnected!!")
@@ -29,13 +29,13 @@ class TestActivity : AppCompatActivity() {
         override fun onServiceConnected(componentName: ComponentName, iBinder: IBinder) {
             Log.i("pudroid", "Service Connected!!")
             service = (iBinder as HttpService.LocalBinder).getService()
-            service!!.registerObserver(this@TestActivity, this@TestActivity.mHandler)
+            service!!.registerObserver(this@DoorActivity, this@DoorActivity.mHandler, "door-latest")
 
         }
     }
 
-    class PuObserverHandler(_activity : TestActivity) : Handler(){
-        private val activity : TestActivity = _activity
+    class PuObserverHandler(_activity : DoorActivity) : Handler(){
+        private val activity : DoorActivity = _activity
         override fun handleMessage(msg: Message) {
             super.handleMessage(msg)
             val value = msg.obj as String
@@ -56,9 +56,10 @@ class TestActivity : AppCompatActivity() {
 
     private val mHandler = PuObserverHandler(this)
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_test)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_door)
         binding!!.status = "loading..."
         if (service == null) {
             val serviceIntent = Intent(this, HttpService::class.java)
@@ -71,7 +72,6 @@ class TestActivity : AppCompatActivity() {
             this.service!!.deregisterObserver()
             val serviceIntent = Intent(this, HttpService::class.java)
             stopService(serviceIntent)
-
         }
 
         super.onDestroy()
