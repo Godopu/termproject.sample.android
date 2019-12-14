@@ -1,5 +1,6 @@
 package godopu.lab.termproject.controller
 
+import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -15,6 +16,7 @@ import godopu.lab.termproject.R
 import godopu.lab.termproject.databinding.ActivityTempBinding
 import godopu.lab.termproject.model.HttpService
 import godopu.lab.termproject.model.ObserverWithHttp
+import godopu.lab.termproject.model.TempService
 import org.json.JSONObject
 
 class TempActivity : AppCompatActivity() {
@@ -68,16 +70,37 @@ class TempActivity : AppCompatActivity() {
 
     private val mHandler = PuObserverHandler(this)
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_temp)
         binding!!.temp = "loading..."
         binding!!.humi = "loading..."
+
+        if(intent.getBooleanExtra("isNoti", false)){
+            val serviceIntent = Intent(this, TempService::class.java)
+            stopService(serviceIntent)
+            binding!!.serviceBtn.text = "Service Not Running"
+        }
+        else{
+            if(TempService.running){
+                binding!!.serviceBtn.text = "Service Running"
+            }else{
+                binding!!.serviceBtn.text = "Service Not Running"
+            }
+        }
+
         if (service == null) {
             val serviceIntent = Intent(this, HttpService::class.java)
             bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE)
         }
+
+        binding!!.serviceBtn.setOnClickListener {
+            if(!TempService.running)
+                this@TempActivity.startCheck()
+            else
+                this@TempActivity.stopCheck()
+        }
+
     }
 
     override fun onDestroy() {
@@ -88,5 +111,17 @@ class TempActivity : AppCompatActivity() {
         }
 
         super.onDestroy()
+    }
+
+    private fun startCheck(){
+        val serviceIntent = Intent(this, TempService::class.java)
+        startService(serviceIntent)
+        binding!!.serviceBtn.text = "Service Running"
+    }
+
+    fun stopCheck(){
+        val serviceIntent = Intent(this, TempService::class.java)
+        stopService(serviceIntent)
+        binding!!.serviceBtn.text = "Service Not Running"
     }
 }

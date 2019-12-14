@@ -18,19 +18,16 @@ import cn.pedant.sweetalert.SweetAlertDialog
 import godopu.lab.termproject.R
 import godopu.lab.termproject.databinding.ActivityServicelistBinding
 import godopu.lab.termproject.model.Device
-import godopu.lab.termproject.model.HttpService
 import java.util.*
 import kotlin.collections.ArrayList
 
 class ServiceListActivity : AppCompatActivity() {
 
-    private var service: HttpService? = null
     private var binding: ActivityServicelistBinding? = null
     private lateinit var recyclerView: RecyclerView
     private var adapter: ServiceListAdapter = ServiceListAdapter(this)
     private var layoutManager = LinearLayoutManager(this)
     private lateinit var dialog: SweetAlertDialog
-    private lateinit var serviceIntent: Intent
 
     private fun selectItemEventListener(item: Device) {
         when (item.Name) {
@@ -153,9 +150,12 @@ class ServiceListActivity : AppCompatActivity() {
         }
     }
 
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_servicelist)
+
 
 
         this.recyclerView = findViewById(R.id.recycler_view)
@@ -170,16 +170,6 @@ class ServiceListActivity : AppCompatActivity() {
         this.adapter.addItem(Device("Temp", "Display"))
 
         this.adapter.notifyDataSetChanged()
-    }
-
-
-    override fun onPause() {
-        if (service != null) {
-            val serviceIntent = Intent(this, HttpService::class.java)
-            stopService(serviceIntent)
-        }
-
-        super.onPause()
     }
 
     private class ServiceListAdapter : RecyclerView.Adapter<ServiceListAdapter.ViewHolder> {
