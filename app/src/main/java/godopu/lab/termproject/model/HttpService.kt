@@ -35,11 +35,7 @@ class HttpService : Service() {
         Log.i("pudroid", "Service destroy")
         super.onDestroy()
     }
-
-
-
-
-
+    
     fun httpRequestWithHandler(
         context: Context,
         method: String,
